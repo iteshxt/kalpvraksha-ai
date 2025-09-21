@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalpvraksha AI Voice API Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .test-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .input-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(45deg, #2196F3, #1976D2);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 5px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .btn.danger {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .result.success {
+            background: #e8f5e8;
+            border: 2px solid #4CAF50;
+            color: #2e7d32;
+        }
+
+        .result.error {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+        }
+
+        .result.info {
+            background: #e3f2fd;
+            border: 2px solid #2196F3;
+            color: #1565c0;
+        }
+
+        .audio-player {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .audio-controls audio {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.online {
+            background: #4CAF50;
+        }
+
+        .status-indicator.offline {
+            background: #f44336;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quick-test-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧘‍♂️ Kalpvraksha AI Voice API Test</h1>
+            <p>Test your voice AI endpoints with this interactive interface</p>
+        </div>
+
+        <div class="content">
+            <!-- API Status Section -->
+            <div class="test-section">
+                <h2><span id="statusIndicator" class="status-indicator offline"></span>API Status</h2>
+                <button class="btn secondary" onclick="checkHealth()">Check Health</button>
+                <button class="btn secondary" onclick="checkAllEndpoints()">Test All Endpoints</button>
+                <div id="healthResult" class="result info" style="display: none;"></div>
+            </div>
+
+            <div class="grid">
+                <!-- Chat Endpoint Test -->
+                <div class="test-section">
+                    <h2>💬 Chat Endpoint Test</h2>
+                    <div class="quick-test-buttons">
+                        <button class="btn" onclick="quickTest('Hello! How are you today?')">Quick Test 1</button>
+                        <button class="btn" onclick="quickTest('Give me wellness advice for stress.')">Quick Test 2</button>
+                        <button class="btn" onclick="quickTest('What is meditation?')">Quick Test 3</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="chatText">Message:</label>
+                        <textarea id="chatText" placeholder="Enter your message here...">Hello! How are you today?</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="voiceName">Voice Name (optional):</label>
+                        <select id="voiceName">
+                            <option value="">Default</option>
+                            <option value="Sadaltager">Sadaltager</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn" onclick="testChat()">Send Message</button>
+                    <button class="btn secondary" onclick="clearChatResult()">Clear</button>
+                    
+                    <div id="chatResult" class="result" style="display: none;"></div>
+                    <div id="audioPlayer" class="audio-player" style="display: none;">
+                        <h4>🎵 Audio Response:</h4>
+                        <div class="audio-controls">
+                            <audio id="responseAudio" controls></audio>
+                        </div>
+                        <button class="btn secondary" onclick="downloadAudio()">Download Audio</button>
+                    </div>
+                </div>
+
+                <!-- Audio Processing Test -->
+                <div class="test-section">
+                    <h2>🎵 Audio Processing Test</h2>
+                    <div class="input-group">
+                        <label for="audioFormat">Audio Format:</label>
+                        <select id="audioFormat">
+                            <option value="wav">WAV</option>
+                            <option value="mp3">MP3</option>
+                            <option value="ogg">OGG</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="audioFile">Upload Audio File (optional):</label>
+                        <input type="file" id="audioFile" accept="audio/*" onchange="handleAudioFile(this)">
+                    </div>
+                    
+                    <button class="btn" onclick="testAudioProcessing()">Test with Dummy Data</button>
+                    <button class="btn secondary" onclick="testWithUploadedAudio()">Test with Uploaded Audio</button>
+                    <button class="btn secondary" onclick="clearAudioResult()">Clear</button>
+                    
+                    <div id="audioResult" class="result" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Error Testing Section -->
+            <div class="test-section">
+                <h2>⚠️ Error Handling Tests</h2>
+                <button class="btn danger" onclick="testMissingText()">Test Missing Text</button>
+                <button class="btn danger" onclick="testInvalidEndpoint()">Test Invalid Endpoint</button>
+                <button class="btn danger" onclick="testMissingAudioData()">Test Missing Audio Data</button>
+                <button class="btn secondary" onclick="clearErrorResult()">Clear</button>
+                
+                <div id="errorResult" class="result" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3000';
+        let currentAudioData = null;
+
+        // Check API health on page load
+        window.onload = function() {
+            checkHealth();
+        };
+
+        async function checkHealth() {
+            const result = document.getElementById('healthResult');
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Checking API health...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/health`);
+                const data = await response.json();
+                
+                if (data.status === 'healthy') {
+                    result.className = 'result success';
+                    document.getElementById('statusIndicator').className = 'status-indicator online';
+                    result.textContent = `✅ API is healthy!\n\nService: ${data.service}\nVersion: ${data.version}\nEnvironment: ${data.environment}\nAPI Key: ${data.configuration.geminiApiKey}\nTimestamp: ${data.timestamp}\n\nAvailable Endpoints:\n${data.endpoints.map(ep => `• ${ep.method} ${ep.path} - ${ep.description}`).join('\n')}`;
+                } else {
+                    throw new Error('API reported unhealthy status');
+                }
+            } catch (error) {
+                result.className = 'result error';
+                document.getElementById('statusIndicator').className = 'status-indicator offline';
+                result.textContent = `❌ Health check failed: ${error.message}\n\nMake sure the server is running with: npm run dev`;
+            }
+        }
+
+        function quickTest(message) {
+            document.getElementById('chatText').value = message;
+            testChat();
+        }
+
+        async function testChat() {
+            const text = document.getElementById('chatText').value.trim();
+            const voiceName = document.getElementById('voiceName').value;
+            const result = document.getElementById('chatResult');
+            const audioPlayer = document.getElementById('audioPlayer');
+            
+            if (!text) {
+                showResult('chatResult', 'Please enter a message to send.', 'error');
+                return;
+            }
+
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Sending message...';
+            audioPlayer.style.display = 'none';
+
+            try {
+                const requestBody = { text };
+                if (voiceName) requestBody.voiceName = voiceName;
+
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    let resultText = '✅ Chat successful!\n\n';
+                    
+                    if (data.textResponse) {
+                        resultText += `Text Response: ${data.textResponse}\n\n`;
+                    }
+                    
+                    if (data.audioData) {
+                        resultText += `Audio Data: ${data.audioData.length} characters (base64)\n`;
+                        resultText += `Audio Format: ${data.audioFormat}\n`;
+                        
+                        // Create audio blob and play
+                        const audioBytes = atob(data.audioData);
+                        const audioArray = new Uint8Array(audioBytes.length);
+                        for (let i = 0; i < audioBytes.length; i++) {
+                            audioArray[i] = audioBytes.charCodeAt(i);
+                        }
+                        
+                        const audioBlob = new Blob([audioArray], { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        
+                        document.getElementById('responseAudio').src = audioUrl;
+                        audioPlayer.style.display = 'block';
+                        currentAudioData = { blob: audioBlob, filename: `response_${Date.now()}.wav` };
+                    }
+                    
+                    result.textContent = resultText;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                showResult('chatResult', `❌ Request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAudioProcessing() {
+            const format = document.getElementById('audioFormat').value;
+            const dummyData = btoa('dummy audio data for testing purposes');
+            
+            await sendAudioProcessingRequest(dummyData, format);
+        }
+
+        async function testWithUploadedAudio() {
+            const fileInput = document.getElementById('audioFile');
+            const format = document.getElementById('audioFormat').value;
+            
+            if (!fileInput.files.length) {
+                showResult('audioResult', 'Please select an audio file first.', 'error');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                const arrayBuffer = e.target.result;
+                const bytes = new Uint8Array(arrayBuffer);
+                let binary = '';
+                for (let i = 0; i < bytes.byteLength; i++) {
+                    binary += String.fromCharCode(bytes[i]);
+                }
+                const base64Data = btoa(binary);
+                
+                await sendAudioProcessingRequest(base64Data, format);
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function sendAudioProcessingRequest(audioData, format) {
+            const result = document.getElementById('audioResult');
+            result.style.display = 'block';
+            result.className = 'result info';
+            result.textContent = 'Processing audio...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/process-audio`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        audioData: audioData,
+                        format: format
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    result.className = 'result success';
+                    result.textContent = `✅ Audio processing successful!\n\nMessage: ${data.message}\nReceived Format: ${data.receivedFormat}\nData Length: ${data.dataLength}\n\nNote: ${data.note}`;
+                } else {
+                    throw new Error(data.error || 'Unknown error');
+                }
+            } catch (error) {
+                showResult('audioResult', `❌ Audio processing failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMissingText() {
+            showResult('errorResult', 'Testing missing text parameter...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                
+                if (response.status === 400) {
+                    showResult('errorResult', `✅ Error handling working correctly!\n\nStatus: ${response.status}\nError: ${data.error}`, 'success');
+                } else {
+                    showResult('errorResult', `❌ Unexpected response: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showResult('errorResult', `❌ Request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testInvalidEndpoint() {
+            showResult('errorResult', 'Testing invalid endpoint...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/nonexistent`);
+                
+                if (response.status === 404) {
+                    showResult('errorResult', `✅ 404 handling working correctly!\n\nStatus: ${response.status}`, 'success');
+                } else {
+                    showResult('errorResult', `❌ Unexpected response: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showResult('errorResult', `❌ Request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMissingAudioData() {
+            showResult('errorResult', 'Testing missing audio data...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/process-audio`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ format: 'wav' })
+                });
+
+                const data = await response.json();
+                
+                if (response.status === 400) {
+                    showResult('errorResult', `✅ Error handling working correctly!\n\nStatus: ${response.status}\nError: ${data.error}`, 'success');
+                } else {
+                    showResult('errorResult', `❌ Unexpected response: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showResult('errorResult', `❌ Request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAllEndpoints() {
+            showResult('healthResult', 'Running comprehensive test...', 'info');
+            
+            let results = [];
+            
+            // Test health
+            try {
+                await fetch(`${API_BASE_URL}/api/health`);
+                results.push('✅ Health endpoint: OK');
+            } catch (error) {
+                results.push('❌ Health endpoint: FAILED');
+            }
+            
+            // Test chat
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: 'test' })
+                });
+                results.push(`✅ Chat endpoint: OK (${response.status})`);
+            } catch (error) {
+                results.push('❌ Chat endpoint: FAILED');
+            }
+            
+            // Test audio processing
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/process-audio`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ audioData: btoa('test') })
+                });
+                results.push(`✅ Audio processing endpoint: OK (${response.status})`);
+            } catch (error) {
+                results.push('❌ Audio processing endpoint: FAILED');
+            }
+            
+            showResult('healthResult', `Endpoint Test Results:\n\n${results.join('\n')}`, 'success');
+        }
+
+        function handleAudioFile(input) {
+            const file = input.files[0];
+            if (file) {
+                showResult('audioResult', `Audio file selected: ${file.name}\nSize: ${(file.size / 1024).toFixed(2)} KB\nType: ${file.type}`, 'info');
+            }
+        }
+
+        function downloadAudio() {
+            if (currentAudioData) {
+                const url = URL.createObjectURL(currentAudioData.blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentAudioData.filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function showResult(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${type}`;
+            element.textContent = message;
+        }
+
+        function clearChatResult() {
+            document.getElementById('chatResult').style.display = 'none';
+            document.getElementById('audioPlayer').style.display = 'none';
+        }
+
+        function clearAudioResult() {
+            document.getElementById('audioResult').style.display = 'none';
+        }
+
+        function clearErrorResult() {
+            document.getElementById('errorResult').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
